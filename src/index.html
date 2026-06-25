@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Datadog RUM Playground</title>
+
+        <script>
+  (function(h,o,u,n,d) {
+    h=h[d]=h[d]||{q:[],onReady:function(c){h.q.push(c)}}
+    d=o.createElement(u);d.async=1;d.src=n;d.crossOrigin=''
+    n=o.getElementsByTagName(u)[0];n.parentNode.insertBefore(d,n)
+  })(window,document,'script','https://www.datadoghq-browser-agent.com/us1/v7/datadog-rum.js','DD_RUM')
+  window.DD_RUM.onReady(function() {
+    window.DD_RUM.init({
+        applicationId: 'cef29b1e-8f77-4512-a62d-577c23f7d120',
+        clientToken: 'pub898f0228b771bb7b7e007e0ae89947d2',
+        site: 'datadoghq.com',
+        service: '<SERVICE_NAME>',
+        env: '<ENV_NAME>',				// e.g. 'prod', 'staging-1', 'dev'
+        version: '<VERSION_NUMBER>',	// e.g. '1.0.0'
+        sessionSampleRate: 100,			// capture 100% of sessions
+        sessionReplaySampleRate: 20,	// capture 20% of sessions with replay
+        trackResources: true,			// Enable Resource tracking
+        trackUserInteractions: true,	// Enable Action tracking
+        trackLongTasks: true,			// Enable Long Tasks tracking
+    
+        // ----- Recommended Options -----
+        // allowedTracingUrls: '<BACKEND_URL>',		// Enable distributed tracing
+        // defaultPrivacyLevel: 'mask-user-input',	// 'mask-user-input' | 'allow' | 'mask'
+    });
+  })
+</script>
+
+        <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    button {
+      margin: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+
+    #output {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      min-height: 80px;
+    }
+  </style>
+    </head>
+    <body>
+
+        <h1>Datadog RUM Playground</h1>
+
+        <p>ใช้สำหรับทดสอบ RUM Events</p>
+
+        <button onclick="healthCheck()">
+            Health Check
+        </button>
+
+        <button onclick="normalClick()">
+            Normal Click
+        </button>
+
+        <button onclick="throwError()">
+            JS Error
+        </button>
+
+        <button onclick="successApi()">
+            API Success
+        </button>
+
+        <button onclick="failApi()">
+            API Fail
+        </button>
+
+        <button onclick="freezeUI()">
+            Freeze UI 5 sec
+        </button>
+
+        <button onclick="changeRoute()">
+            Route Change
+        </button>
+
+        <br /><br />
+
+        <input
+            id="username"
+            placeholder="Type something..." />
+
+        <div id="output"></div>
+
+        <script type="module">
+            import { healthCheck } from "./healthCheck.js";
+            import { log, normalClick, throwError, successApi, failApi, freezeUI, changeRoute } from "./rumFuncTest.js";
+
+            window.healthCheck = healthCheck;
+            window.normalClick = normalClick;
+            window.throwError = throwError;
+            window.successApi = successApi;
+            window.failApi = failApi;
+            window.freezeUI = freezeUI;
+            window.changeRoute = changeRoute;
+        </script>
+    </body>
+
+</html>
