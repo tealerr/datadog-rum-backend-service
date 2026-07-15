@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npm run start
+    volumes:
+      - ./src:/app/src
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      PORT: 3000
+      SYNTHETIC_API_KEY: "${SYNTHETIC_API_KEY:-synthetic-api-key}"
+    init: true
+    restart: unless-stopped
