@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { requireApiKey } from "./middleware/requireApiKey.js";
+import { users } from "./data/users.js";
+import { decryptPassword } from "./utils/decryptPassword.js";
 
 const router = Router();
 
@@ -74,6 +76,51 @@ router.post("/auth/token", (req, res) => {
     accessToken: "synthetic-test-token",
     tokenType: "Bearer",
     expiresIn: 3600,
+  });
+});
+
+router.post("/login", (req, res) => {
+  const { username, password } = req.body ?? {};
+
+  if (typeof username !== "string" || typeof password !== "string") {
+    return res.status(400).json({
+      error: "validation_error",
+      message: "username and encrypted password are required",
+    });
+  }
+
+  let decryptedPassword;
+  try {
+    decryptedPassword = decryptPassword(password);
+  } catch (error) {
+    if (error.message === "LOGIN_ENCRYPTION_KEY is not configured") {
+      return res.status(500).json({ error: "encryption_not_configured" });
+    }
+
+    return res.status(400).json({
+      error: "invalid_encrypted_password",
+      message: "password could not be decrypted",
+    });
+  }
+
+  const user = users.find(
+    (candidate) =>
+      candidate.username === username &&
+      candidate.password === decryptedPassword,
+  );
+
+  if (!user) {
+    return res.status(401).json({
+      error: "invalid_credentials",
+      message: "Invalid username or password",
+    });
+  }
+
+  const { password: _password, ...safeUser } = user;
+
+  return res.status(200).json({
+    message: "Login successful",
+    user: safeUser,
   });
 });
 

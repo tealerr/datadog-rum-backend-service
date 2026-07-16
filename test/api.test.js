@@ -1,11 +1,29 @@
 import assert from "node:assert/strict";
+import { createCipheriv, createHash, randomBytes } from "node:crypto";
 import { after, before, test } from "node:test";
 import app from "../src/app.js";
+
+const TEST_ENCRYPTION_KEY = "test-shared-key";
+
+function encryptPassword(value) {
+  const key = createHash("sha256").update(TEST_ENCRYPTION_KEY).digest();
+  const iv = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", key, iv);
+  const ciphertext = Buffer.concat([
+    cipher.update(value, "utf8"),
+    cipher.final(),
+  ]);
+
+  return [iv, cipher.getAuthTag(), ciphertext]
+    .map((part) => part.toString("base64"))
+    .join(":");
+}
 
 let server;
 let baseUrl;
 
 before(async () => {
+  process.env.LOGIN_ENCRYPTION_KEY = TEST_ENCRYPTION_KEY;
   await new Promise((resolve) => {
     server = app.listen(0, "127.0.0.1", resolve);
   });
@@ -48,6 +66,48 @@ test("POST /auth/token rejects invalid credentials", async () => {
 
   assert.equal(response.status, 401);
   assert.deepEqual(await response.json(), { error: "invalid_credentials" });
+});
+
+test("POST /login authenticates a user from users.js", async () => {
+  const response = await fetch(`${baseUrl}/login`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      username: "tea",
+      password: encryptPassword("password123"),
+    }),
+  });
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.message, "Login successful");
+  assert.deepEqual(body.user, {
+    username: "tea",
+    name: "Teetamate K",
+    email: "tea@example.com",
+  });
+  assert.equal("password" in body.user, false);
+});
+
+test("POST /login rejects missing or invalid credentials", async () => {
+  const missingCredentials = await fetch(`${baseUrl}/login`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ username: "tea" }),
+  });
+  const invalidCredentials = await fetch(`${baseUrl}/login`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      username: "tea",
+      password: encryptPassword("wrong"),
+    }),
+  });
+
+  assert.equal(missingCredentials.status, 400);
+  assert.equal((await missingCredentials.json()).error, "validation_error");
+  assert.equal(invalidCredentials.status, 401);
+  assert.equal((await invalidCredentials.json()).error, "invalid_credentials");
 });
 
 test("GET /protected requires and accepts an API key", async () => {

@@ -9,6 +9,8 @@ npm start
 ```
 
 The service listens on `http://localhost:3000`. Set `PORT` to use another port.
+Copy `.env.example` to `.env` and set `LOGIN_ENCRYPTION_KEY` to the same value
+used by the frontend encryption logic.
 
 ### Run with Docker Compose
 
@@ -34,7 +36,12 @@ Stop and remove the container with `docker compose down`.
 | GET | `/api/delay/:milliseconds` | Response-time tests, up to 10 seconds |
 | ANY | `/api/echo` | Request method, query, header, and body assertions |
 | POST | `/api/auth/token` | Multi-step token extraction test |
+| POST | `/api/login` | Validate login credentials against `src/data/users.js` |
 | GET | `/api/protected` | API-key authentication test |
+
+`POST /api/login` expects an AES-256-GCM encrypted `password` using the shared
+`LOGIN_ENCRYPTION_KEY`. Send it as `iv:authTag:ciphertext`, with each part Base64
+encoded. The backend decrypts the value and compares it with `src/data/users.js`.
 
 Default credentials for the mock token endpoint:
 
