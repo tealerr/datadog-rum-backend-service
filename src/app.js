@@ -16,7 +16,22 @@ app.use((req, res, next) => {
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, X-API-Key",
+    [
+      "Content-Type",
+      "Authorization",
+      "X-API-Key",
+
+      // Datadog propagation headers
+      "x-datadog-trace-id",
+      "x-datadog-parent-id",
+      "x-datadog-origin",
+      "x-datadog-sampling-priority",
+
+      // W3C trace propagation
+      "traceparent",
+      "tracestate",
+      "baggage",
+    ].join(", "),
   );
 
   if (req.method === "OPTIONS") {
