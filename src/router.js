@@ -109,4 +109,18 @@ router.get("/protected", requireApiKey, (req, res) => {
   });
 });
 
+router.get("/profile/cpu", (req, res) => {
+  const startedAt = performance.now();
+  let result = 0;
+
+  while (performance.now() - startedAt < 10_000) {
+    result += Math.sqrt(Math.random() * 1_000_000);
+  }
+
+  res.json({
+    message: "CPU profiling workload completed",
+    result,
+  });
+});
+
 export default router;
