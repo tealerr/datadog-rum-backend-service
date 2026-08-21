@@ -1,5 +1,9 @@
 FROM node:22-alpine
 
+# Build metadata
+ARG DD_GIT_REPOSITORY_URL
+ARG DD_GIT_COMMIT_SHA
+
 WORKDIR /app
 
 COPY --chown=node:node package.json package-lock.json ./
@@ -8,7 +12,9 @@ RUN npm ci --omit=dev && npm cache clean --force
 COPY --chown=node:node src ./src
 
 ENV NODE_ENV=production \
-    PORT=3000
+    PORT=3000 \
+    DD_GIT_REPOSITORY_URL=${DD_GIT_REPOSITORY_URL} \
+    DD_GIT_COMMIT_SHA=${DD_GIT_COMMIT_SHA}
 
 USER node
 
