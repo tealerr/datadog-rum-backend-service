@@ -1,11 +1,18 @@
+import { tracer } from "dd-trace";
 import { Router } from "express";
 import { requireApiKey } from "./middleware/requireApiKey.js";
 import { users } from "./data/users.js";
-import { decryptPassword } from "./utils/decryptPassword.js";
 
 const router = Router();
 
 router.get("/health", (req, res) => {
+  const span = tracer.scope().active();
+  console.log("ACTIVE SPAN:", !!span);
+
+  if (span) {
+    span.setTag("test.type", "health-check");
+  }
+
   res.status(200).json({
     status: "ok",
     service: "synthetic-mock-api",

@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: npm run start
+    command: npm run dev
     volumes:
       - ./src:/app/src
     ports:
