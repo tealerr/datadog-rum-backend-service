@@ -19,6 +19,7 @@
   "dependencies": {
     "dd-trace": "^6.5.0",
     "express": "^5.2.1",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "prom-client": "^15.1.3"
   }
 }

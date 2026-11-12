@@ -2,14 +2,32 @@ import express from "express";
 import router from "./router.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import client from "prom-client";
 
 const app = express();
 
+// Comma-separated list, for example:
+// CORS_ORIGINS=https://app.example.com,https://admin.example.com
+const allowedOrigins = (process.env.CORS_ORIGINS ?? "http://localhost:8080")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+client.collectDefaultMetrics();
+
+app.get("/metrics", async (req, res) => {
+  res.set("Content-Type", client.register.contentType);
+  res.end(await client.register.metrics());
+});
 
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:8080");
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+  }
   res.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, PATCH, DELETE, OPTIONS",
