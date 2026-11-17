@@ -4,10 +4,12 @@
   "description": "",
   "main": "src/server.js",
   "scripts": {
-    "dev": "nodemon --legacy-watch --watch src --exec \"node --import dd-trace/register.js\" src/server.js",
+    "dev": "nodemon --watch src --exec \"node --import dd-trace/register.js\" src/server.js",
+    "dev:no-trace": "nodemon --watch src --exec \"node src/server.js --no-trace\"",
     "start": "node --import dd-trace/register.js src/server.js",
+    "start:no-trace": "node src/server.js --no-trace",
     "test": "node --test",
-    "docker:dev": "docker compose -f docker-compose.dev.yml up --build",
+    "docker:dev": "docker compose -f docker-compose.dev.yml up -d",
     "docker:prod": "docker compose -f docker-compose.prod.yml up --build -d",
     "docker:dev:down": "docker compose -f docker-compose.dev.yml down",
     "docker:prod:down": "docker compose -f docker-compose.prod.yml down"

@@ -1,12 +1,15 @@
-import { tracer } from "dd-trace";
 import { Router } from "express";
 import { requireApiKey } from "./middleware/requireApiKey.js";
 import { users } from "./data/users.js";
 
 const router = Router();
+const tracer =
+  process.env.DD_TRACE_ENABLED === "false"
+    ? null
+    : (await import("dd-trace")).tracer;
 
 router.get("/health", (req, res) => {
-  const span = tracer.scope().active();
+  const span = tracer?.scope().active();
   console.log("ACTIVE SPAN:", !!span);
 
   if (span) {
